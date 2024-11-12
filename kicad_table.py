@@ -71,24 +71,35 @@ def generate_table_rows_from_csv(file_path):
 
         rows = []
         for _, row in df.iterrows():
-            dk_part = row['DK Part #']
+            dk_parts = row['DK Part #'].split(",")  # Split multiple DK Part # values
+            packages = row[' Package'].split(",")   # Split multiple Package values
+
+            # Ensure we have the same number of DK parts and package entries if possible
+            if len(dk_parts) != len(packages):
+                # In case of mismatch, duplicate the single value to match the other's length or use first value
+                if len(dk_parts) < len(packages):
+                    dk_parts *= len(packages)
+                elif len(packages) < len(dk_parts):
+                    packages *= len(dk_parts)
+
             mfr_part = row['Mfr Part #']
             mfr = row['Mfr']
             description = row['Description']
-            package = row[' Package']
             capacitance = row['Capacitance']
             tolerance = row['Tolerance']
             voltage = row['Voltage - Rated']
             package_case = row['Package / Case']
 
-            # Clipboard text formatted with "Digikey, DK Part #, Manufacturer, Manufacturer Part Number"
-            clipboard_text = f"Digikey, {dk_part}, {mfr}, {mfr_part}"
+            # Create a row for each DK Part # and Package combination
+            for dk_part, package in zip(dk_parts, packages):
+                dk_part = dk_part.strip()
+                package = package.strip()
+                clipboard_text = f"Digikey, {dk_part}, {mfr}, {mfr_part}"
 
-            # Add a button with an onclick event to copy the clipboard_text
-            copy_button_html = f"""<button class="btn btn-primary btn-sm" onclick="copyToClipboard('{clipboard_text}')">Copy</button>"""
+                copy_button_html = f"""<button class="btn btn-primary btn-sm" onclick="copyToClipboard('{clipboard_text}')">Copy</button>"""
 
-            row_html = f"<tr><td>{dk_part}</td><td>{mfr_part}</td><td>{mfr}</td><td>{description}</td><td>{package}</td><td>{capacitance}</td><td>{tolerance}</td><td>{voltage}</td><td>{package_case}</td><td>{copy_button_html}</td></tr>"
-            rows.append(row_html)
+                row_html = f"<tr><td>{dk_part}</td><td>{mfr_part}</td><td>{mfr}</td><td>{description}</td><td>{package}</td><td>{capacitance}</td><td>{tolerance}</td><td>{voltage}</td><td>{package_case}</td><td>{copy_button_html}</td></tr>"
+                rows.append(row_html)
 
         return "\n".join(rows)
     except Exception as e:
