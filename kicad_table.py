@@ -46,8 +46,12 @@ html_template = """
     }});
 
     function copyToClipboard(text) {{
-        navigator.clipboard.writeText(text).then(function() {{
-            alert('Copied to clipboard: ' + text);
+        // Split the input text by commas, then join by tabs
+        const tabDelimitedText = text.split(',').map(item => item.trim()).join('\\t');
+
+        // Write the tab-delimited text to the clipboard
+        navigator.clipboard.writeText(tabDelimitedText).then(function() {{
+            alert('Copied to clipboard: ' + tabDelimitedText);
         }}, function(err) {{
             console.error('Could not copy text: ', err);
         }});
